@@ -1,33 +1,33 @@
-#ifndef PLANET_H
-#define PLANET_H
-#include <math.h>
+#pragma once
+#include <cmath>
 #include <vector>
 #include <string>
-#include <vector2f.h>
-#include <orbit_queue.h>
 
-class Planet
+#include "Vector.h"
+
+template<typename number>
+struct Planet
 {
-protected:
-    long double mass;
-    Vector2f position;
-    Vector2f speed;
-    Vector2f acceleration;
-    orbit_queue orbit;
+    number mass;
+    number x, y;
+    number speed_x, speed_y;
+    number accel_x, accel_y;
+    number density;
     std::string name;
-    long double density;
-public:
-    Planet(std::string name , long double mass , long double density , Vector2f position , Vector2f speed , int orbit_len);
-    void CalcAcceleration(std::vector<Planet*> planets);
-    void MovePosition(long double delta_time);
 
-    Vector2f GetPosition() const {return position;}
-    Vector2f GetSpeed() const {return speed;}
-    Vector2f GetAccel()const {return acceleration;}
-    const orbit_queue& GetOrbit() const {return orbit;}
-    long double GetMass() const {return mass;}
-    long double GetDestiny()const {return density;}
-    std::string GetName()const {return name;}
+    Planet(std::string name, number mass, number density, number x, number y, number speed_x, number speed_y, number accel_x, number accel_y):
+		mass(mass),
+        x(x),
+        y(y),
+        speed_x(speed_x),
+        speed_y(speed_y),
+        accel_x(accel_x),
+        accel_y(accel_y),
+		name(name),
+		density(density)
+    {}
+    Vector<number> GetPositionV() const { return { x,y }; };
+    Vector<number> GetSpeedV() const { return { speed_x,speed_y }; };
+    Vector<number> GetAccelV() const { return { accel_x,accel_y }; };
+    number GetRadius() const { return pow(3.0 * (mass / density) / 4.0 / 3.14, (number)1/3); };
 };
-
-#endif // PLANET_H

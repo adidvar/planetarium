@@ -1,13 +1,31 @@
-#include "Planet.h"
+#include "planet.h"
+#include "settings.h"
 
-const long double gravity = 6.67 * pow(10,-11);
+const long double gravity = GRAVITY;
 
-/*
+Planet::Planet(std::string name , long double mass, long double density, Vector2f position, Vector2f speed, int orbit_len):
+    mass(mass),
+    position(position),
+    speed(speed),
+    orbit(orbit_len),
+    name(name),
+    density(density)
+{}
+
+Planet::~Planet()
+{
+
+}
+
 void Planet::MovePosition(long double delta_time)
 {
     speed = speed + acceleration * delta_time;
     position = position + speed * delta_time;
-    orbit.push(position);
+}
+
+void Planet::RegisterOrbit()
+{
+     orbit.push(position);
 }
 
 void Planet::CalcAcceleration(std::vector<Planet *> planets)
@@ -25,6 +43,4 @@ void Planet::CalcAcceleration(std::vector<Planet *> planets)
 
         acceleration=acceleration +a;
     }
-
 }
-*/

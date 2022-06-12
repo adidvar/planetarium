@@ -3,6 +3,7 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include "ship.h"
+#include <assert.h>
 
 //загружає з файлу конфігурації
 init_result file_init(std::string filename)
@@ -44,6 +45,7 @@ init_result random_init()
 //просто загружає
 init_result initplanets()
 {
+    std::cout << "PLANETARIUM BUILD " << __DATE__ << " " << __TIME__ << std::endl;
     std::vector<std::string> configs;
 
     boost::filesystem::directory_iterator dir(boost::filesystem::current_path());
@@ -51,11 +53,23 @@ init_result initplanets()
         if(p.filename().string().front()=='=')
             configs.push_back(p.filename().string());
 
+    if(configs.size() == 0)
+        exit(0);
+
+    if(configs.size() == 1)
+        return file_init(configs.front());
+
     unsigned counter = 0;
     for(const auto &i : configs)
         std::cout << '(' << counter++ << ')' << "Finded new config---" << i << std::endl;
-    std::cout << "Enter configuration number:";
-    std::cin >> counter;
+
+    while(counter < 0 || counter >= configs.size())
+    {
+        std::cout << "Enter configuration number:";
+        std::cin >> counter;
+    }
+
+
 
     return file_init(configs.at(counter));
 }

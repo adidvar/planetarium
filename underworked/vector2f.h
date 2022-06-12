@@ -2,7 +2,9 @@
 #define VECTOR2F_H
 #include "math.h"
 #include <SFML/System/Vector2.hpp>
-
+/**
+ * @brief Математичний вектор
+ */
 struct Vector2f
 {
     Vector2f(long double x , long double y):
