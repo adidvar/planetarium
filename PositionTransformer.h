@@ -2,8 +2,9 @@
 
 constexpr unsigned scrool_speed = 30;
 
-template<typename number, size_t width , size_t height>
+template<typename number>
 class PTransformer {
+    size_t width, height;
     struct position
 	{
 		number x , y;
@@ -14,6 +15,9 @@ class PTransformer {
 		return current_position / max_position * proect_max_pos;
 	};
 public:
+    PTransformer(size_t width, size_t height) :
+        width(width),
+        height(height) {};
     number ScaleW(number current_position) {
         return transform_p(current_position - cposition[0].x , cposition[1].x-cposition[0].x , width );
     }

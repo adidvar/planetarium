@@ -3,6 +3,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <chrono>
 
 #include "PlanetsController.h"
 
@@ -25,13 +26,18 @@ class PlanetsThread : protected PlanetsController<number> {
 	std::atomic<number> play_for;
 
 	std::atomic<bool> stop_token =  true;
-	std::atomic<number> progress;
+	std::atomic<bool> slowdownwarning = false;
+	std::atomic<size_t> progress;
+
+	std::atomic<size_t> simulationfrequency;
 
 	std::thread thread;
-
 	mutable std::mutex main_mutex;
 
 public:
+
+    using number_t = number;
+
 	PlanetsThread(size_t count) :
 		PlanetsController(count),
 		thread(&PlanetsThread::Thread, this),
@@ -54,16 +60,27 @@ public:
 	}
 	void PlayFor(number time) {
 		play_for = time;
-		moode = skip_for;
+		mode = skip_for;
 	};
+	bool IsLoading() {
+		return mode.load() == skip_until || mode.load() == skip_for;
+	}
+	bool SlowDownWarning() {
+		return slowdownwarning.load();
+	}
+	size_t GetSimulationFrequency() {
+		return simulationfrequency.load();
+	}
+
+	size_t GetProgress() {
+		return progress.load();
+	}
     
 	std::string GetTimeDump() {
-		std::lock_guard guard(main_mutex);
 		return PlanetsController::GetTimeDump();
 	}
 
 	Planet<number> operator [](size_t i) const {
-		std::lock_guard guard(main_mutex);
 		return Planet<number>(name[i], mass[i], density[i], x[i], y[i], speed_x[i], speed_y[i], accel_x[i], accel_y[i]);
 	}
 
@@ -77,30 +94,46 @@ public:
 
 	void ConnectHandle(size_t planet_index, std::shared_ptr<PlanetHandle<number>> handle)  {
 		std::lock_guard guard(main_mutex);
-		PlanetController<number>::ConnectHandle(planet_index, handle);
+		PlanetsController<number>::ConnectHandle(planet_index, handle);
 	}
 private:
 	void Thread() {
 		while (stop_token) {
 			if (mode == playing)
-			{
-				Calculate(std::chrono::duration<number>(speed_multiplier.load() / frequency.load()));
-				std::this_thread::sleep_for(std::chrono::duration<number>(1.0 / frequency));
+			{	
+				using std::chrono::high_resolution_clock;
+				auto btime = high_resolution_clock::now();
+				{
+					std::lock_guard guard(main_mutex);
+					Calculate(std::chrono::duration<number>(speed_multiplier.load() / frequency.load()));
+					PlanetsController<number>::ExecuteHandles(std::chrono::duration<number>(speed_multiplier.load() / frequency.load()));
+				}
+				auto delta = std::chrono::duration_cast<std::chrono::duration<number>>(high_resolution_clock::now() - btime);
+				auto time_to_wait = (1.0 / frequency - delta.count());
+				slowdownwarning = time_to_wait <= 0;
+				if (slowdownwarning)
+					time_to_wait = 0;
+				simulationfrequency = (speed_multiplier.load() / frequency.load()) / (time_to_wait + delta.count());
+				std::this_thread::sleep_for(std::chrono::duration<number>(time_to_wait));
 			}
 			else if (mode == stopped) {
 				std::this_thread::yield();
 			}
 			else if (mode == skip_until) {
+				std::lock_guard guard(main_mutex);
 				for (size_t i = 0; i < 100; i++) {
 					Calculate((std::chrono::duration<number>(play_until.load()) - this->time) / 100);
 					progress = i;
 				}
+				mode = stopped;
 			}
 			else if (mode == skip_for) {
+				std::lock_guard guard(main_mutex);
 				for (size_t i = 0; i < 100; i++) {
 					Calculate(std::chrono::duration<number>(play_for.load()) / 100);
 					progress = i;
 				}
+				mode = stopped;
 			}
 
 		}

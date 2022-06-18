@@ -9,7 +9,7 @@ find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
 
 file(GLOB files 
      "*.h"
-     "*.cpp" 
+     "*.cpp"
 )
 add_executable(Planetarium ${files})
 target_link_libraries(Planetarium sfml-system sfml-window sfml-graphics)

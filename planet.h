@@ -15,6 +15,18 @@ struct Planet
     number density;
     std::string name;
 
+    Planet() :
+        mass{},
+        x{},
+        y{},
+        speed_x{},
+        speed_y{},
+        accel_x{},
+        accel_y{},
+        name{},
+        density{}
+    {
+    };
     Planet(std::string name, number mass, number density, number x, number y, number speed_x, number speed_y, number accel_x, number accel_y):
 		mass(mass),
         x(x),

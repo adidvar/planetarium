@@ -85,18 +85,21 @@ public:
     }
 
     void ConnectHandle(size_t planet_index, std::shared_ptr<PlanetHandle<number>> handle) {
-        handle->Reset((*this)[planet_index]);
+        handle->Reset(this->operator[](planet_index));
         handles.emplace_back(planet_index, std::move(handle));
     }
 
 public:
-    void ExecuteHandles() {
+
+    using number_t = number;
+
+    void ExecuteHandles(std::chrono::duration<number> delta) {
         for(auto&& [planet_index,handle] : handles)
-            handle->lock()->Get((*this)[planet_index]);
+            handle.lock()->Update((*this)[planet_index], delta , time);
     }
     void ClearHandles() {
         for(auto&& [planet_index,handle] : handles)
-            handle->lock()->Reset((*this)[planet_index]);
+            handle.lock()->Reset((*this)[planet_index]);
     }
 	
     void SetTaktTime(std::chrono::duration<number> dtime)
