@@ -4,8 +4,8 @@
 #include <string>
 
 #include "Vector.h"
+#include "Number.h"
 
-template<typename number>
 struct Planet
 {
     number mass;
@@ -38,8 +38,8 @@ struct Planet
 		name(name),
 		density(density)
     {}
-    Vector<number> GetPositionV() const { return { x,y }; };
-    Vector<number> GetSpeedV() const { return { speed_x,speed_y }; };
-    Vector<number> GetAccelV() const { return { accel_x,accel_y }; };
+    Vector GetPositionV() const { return { x,y }; };
+    Vector GetSpeedV() const { return { speed_x,speed_y }; };
+    Vector GetAccelV() const { return { accel_x,accel_y }; };
     number GetRadius() const { return pow(3.0 * (mass / density) / 4.0 / 3.14, (number)1/3); };
 };

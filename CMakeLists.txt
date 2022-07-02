@@ -7,9 +7,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
 file(GLOB files 
      "*.h"
      "*.cpp"
 )
 add_executable(Planetarium ${files})
-target_link_libraries(Planetarium sfml-system sfml-window sfml-graphics)
+target_link_libraries(Planetarium sfml-system sfml-window sfml-graphics ${CONAN_LIBS})

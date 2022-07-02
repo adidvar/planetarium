@@ -4,22 +4,21 @@
 #include <mutex>
 #include <atomic>
 #include <chrono>
+#include <vector>
 
 #include "PlanetsController.h"
 
-template <typename number>
-class PlanetsThread : protected PlanetsController<number> {
+class PlanetsThread : protected PlanetsController {
 	enum modes {
 		playing,
 		stopped,
 		skip_until,
 		skip_for,
 	};
-	std::atomic<modes> mode; // mode what currently work
-
+	std::atomic<modes> mode = stopped; // mode what currently work
 	std::atomic<number> speed_multiplier; // speed of playing
 
-	std::atomic<size_t> frequency; // updates peer second
+	std::atomic<size_t> frequency = 60; // updates peer second
 
 	std::atomic<number> play_until;
 
@@ -36,27 +35,28 @@ class PlanetsThread : protected PlanetsController<number> {
 
 public:
 
-    using number_t = number;
+	using duration = PlanetsController::duration;
 
-	PlanetsThread(size_t count) :
-		PlanetsController(count),
-		thread(&PlanetsThread::Thread, this),
-		mode(stopped)
+	PlanetsThread(PlanetsController &&source):
+		PlanetsController(std::move(source)),
+		thread(&PlanetsThread::Thread, this)
 	{
-		thread.detach();
+	};
+	~PlanetsThread(){
+		stop_token = false;
+		thread.join();
 	};
 
 	void Stop() {
 		mode = stopped;
 	};
-	void Play(number speed_mult, size_t frequency) {
+	void Play(number speed_mult) {
 		speed_multiplier = speed_mult;
-		this->frequency = frequency;
 		mode = playing;
 	}
 	void PlayUntil(number time) {
 		play_until = time;
-		moode = skip_until;
+		mode = skip_until;
 	}
 	void PlayFor(number time) {
 		play_for = time;
@@ -77,25 +77,26 @@ public:
 	}
     
 	std::string GetTimeDump() {
+		std::lock_guard guard(main_mutex);
 		return PlanetsController::GetTimeDump();
 	}
 
-	Planet<number> operator [](size_t i) const {
-		return Planet<number>(name[i], mass[i], density[i], x[i], y[i], speed_x[i], speed_y[i], accel_x[i], accel_y[i]);
-	}
+	std::vector<Planet> LoadState() const {
+		std::lock_guard guard(main_mutex);
+		std::vector<Planet> planets;
+		for (size_t i = 0; i < count; i++)
+			planets.push_back(this->operator[](i));
+		return planets;
+	};
 
-    void SetTaktTime(std::chrono::duration<number> dtime)
+    void SetFrameTime(duration frame_time)
     {
 		std::lock_guard guard(main_mutex);
-		time_peer_takt = dtime;
+		time_peer_frame = frame_time;
 	}
 
 	size_t Count() const { return count; };
 
-	void ConnectHandle(size_t planet_index, std::shared_ptr<PlanetHandle<number>> handle)  {
-		std::lock_guard guard(main_mutex);
-		PlanetsController<number>::ConnectHandle(planet_index, handle);
-	}
 private:
 	void Thread() {
 		while (stop_token) {
@@ -105,8 +106,7 @@ private:
 				auto btime = high_resolution_clock::now();
 				{
 					std::lock_guard guard(main_mutex);
-					Calculate(std::chrono::duration<number>(speed_multiplier.load() / frequency.load()));
-					PlanetsController<number>::ExecuteHandles(std::chrono::duration<number>(speed_multiplier.load() / frequency.load()));
+					PlanetsController::Play(std::chrono::duration<number>(speed_multiplier.load() / frequency.load()));
 				}
 				auto delta = std::chrono::duration_cast<std::chrono::duration<number>>(high_resolution_clock::now() - btime);
 				auto time_to_wait = (1.0 / frequency - delta.count());
@@ -122,7 +122,7 @@ private:
 			else if (mode == skip_until) {
 				std::lock_guard guard(main_mutex);
 				for (size_t i = 0; i < 100; i++) {
-					Calculate((std::chrono::duration<number>(play_until.load()) - this->time) / 100);
+					PlanetsController::Play((std::chrono::duration<number>(play_until.load()) - this->time) / 100);
 					progress = i;
 				}
 				mode = stopped;
@@ -130,7 +130,7 @@ private:
 			else if (mode == skip_for) {
 				std::lock_guard guard(main_mutex);
 				for (size_t i = 0; i < 100; i++) {
-					Calculate(std::chrono::duration<number>(play_for.load()) / 100);
+					PlanetsController::Play(std::chrono::duration<number>(play_for.load()) / 100);
 					progress = i;
 				}
 				mode = stopped;
@@ -138,24 +138,4 @@ private:
 
 		}
 	}
-public:
-    [[deprecated]]
-    static std::unique_ptr<PlanetsThread<number>> FromFile(std::string filename) {
-        std::ifstream file;
-        file.open(filename.c_str());
-
-        size_t count;
-        file >> count;
-        auto planets = new PlanetsThread<number>(count);
-        std::string delta_time, orbit_len, vector_scale, default_scale;
-        file >> delta_time >> orbit_len >>vector_scale >> default_scale;
-
-        for (size_t i = 0; i < count; i++) {
-            if (!file)std::exit(1);
-            file >> planets->name[i] >> planets->mass[i] >> planets->density[i] >> planets->x[i] >> planets->y[i] >> planets->speed_x[i] >> planets->speed_y[i];
-        }
-
-        file.close();
-        return std::unique_ptr<PlanetsThread<number>>(planets);
-    }
 };

@@ -9,15 +9,25 @@ class Options {
 	std::unordered_map <std::string, std::string> options;
 	mutable std::mutex mutex;
 public:
+	Options() {};
+	Options(const Options& from):
+		options(from.options),
+		mutex()
+	{};
+	Options(Options&&from):
+		options(std::move(from.options)),
+		mutex()
+	{
+	};
 	std::string Get(std::string name) const 
 	{
 		std::lock_guard guard(mutex);
 		return options.at(name); 
 	};
 	void Set(std::string name, std::string value)
-	{ 
+	{
 		std::lock_guard guard(mutex);
-		options[name] = value; 
+		options[name] = value;
 	};
 };
 
@@ -48,3 +58,9 @@ public:
 		}
 	};
 };
+
+template<typename T>
+T GetOption(const Options& opts , std::string name) {
+	Option<T> opt(opts,name);
+	return opt.Get();
+}

@@ -2,4 +2,4 @@
 
 #include <SFML/Graphics.hpp>
 
-sf::Font mfont; 
+inline sf::Font mfont; 

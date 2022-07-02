@@ -2,7 +2,8 @@
 
 #include <cmath>
 
-template<typename number>
+#include "Number.h"
+
 struct Vector
 {
     Vector(number x, number y):
@@ -23,8 +24,7 @@ struct Vector
 };
 
 
-template<typename number>
-inline Vector<number> Vector<number>::fromVector(number forge, number cos, number sin)
+inline Vector Vector::fromVector(number forge, number cos, number sin)
 {
     return Vector(forge * cos , forge * sin );
 }

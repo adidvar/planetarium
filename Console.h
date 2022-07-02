@@ -1,17 +1,19 @@
 #pragma once
 #include <string>
 #include <algorithm>
+#include <functional>
+#include <vector>
+#include <string>
 
-template <typename T>
 class Console
 {
     std::string command;
-    T& controller;
+    using callback_t = std::function<void(const std::vector<std::string>&)>;
+    callback_t callback;
 public:
-    Console(T& controller):
-        controller(controller)
+    Console(callback_t callback):
+        callback(callback)
     {};
-
     void PushLetter(char character) { command.push_back(character); };
     void BackSpace() { if(command.size())command.pop_back(); };
     void Enter()
@@ -26,20 +28,8 @@ public:
 			commands.emplace_back(bit, eit);
         } while (eit != command.end());
 
-        if (commands.front() == "stop") {
-            controller.Stop();
-        }
-        if (commands.front() == "start") {
-            controller.Play(std::stof(commands[1]), std::stof(commands[2]));
-        }
-        if (commands.front() == "skip") {
-            controller.PlayFor(std::stof(commands[1]));
-        }
-        if (commands.front() == "precision") {
-            controller.SetTaktTime( std::chrono::duration<T::number_t>(std::stof(commands[1])));
-        }
-        
+        callback(commands);
         command.clear();
     };
-    std::string Text() { return std::string(">>")+command; };
+    std::string Text() { return std::string(">>>")+command; };
 };
