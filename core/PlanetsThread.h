@@ -6,9 +6,19 @@
 #include <chrono>
 #include <vector>
 
+
 #include "PlanetsController.h"
 
 class PlanetsThread : protected PlanetsController {
+
+	struct spinlock {
+		std::atomic<bool> lock_ = { false };
+
+		void lock() { while (lock_.exchange(true, std::memory_order_acquire)); }
+
+		void unlock() { lock_.store(false, std::memory_order_release); }
+	};
+
 	enum modes {
 		playing,
 		stopped,
@@ -31,7 +41,7 @@ class PlanetsThread : protected PlanetsController {
 	std::atomic<size_t> simulationfrequency;
 
 	std::thread thread;
-	mutable std::mutex main_mutex;
+	mutable spinlock main_mutex;
 
 public:
 
@@ -106,15 +116,16 @@ private:
 				auto btime = high_resolution_clock::now();
 				{
 					std::lock_guard guard(main_mutex);
-					PlanetsController::Play(std::chrono::duration<number>(speed_multiplier.load() / frequency.load()));
+					auto delta = std::chrono::duration_cast<duration>(high_resolution_clock::now() - btime);
+					PlanetsController::Play(duration(speed_multiplier.load() / frequency.load())+delta*speed_multiplier.load());
 				}
-				auto delta = std::chrono::duration_cast<std::chrono::duration<number>>(high_resolution_clock::now() - btime);
+				auto delta = std::chrono::duration_cast<duration>(high_resolution_clock::now() - btime);
 				auto time_to_wait = (1.0 / frequency - delta.count());
 				slowdownwarning = time_to_wait <= 0;
 				if (slowdownwarning)
 					time_to_wait = 0;
 				simulationfrequency = (speed_multiplier.load() / frequency.load()) / (time_to_wait + delta.count());
-				std::this_thread::sleep_for(std::chrono::duration<number>(time_to_wait));
+				std::this_thread::sleep_for(duration(time_to_wait));
 			}
 			else if (mode == stopped) {
 				std::this_thread::yield();
@@ -122,7 +133,7 @@ private:
 			else if (mode == skip_until) {
 				std::lock_guard guard(main_mutex);
 				for (size_t i = 0; i < 100; i++) {
-					PlanetsController::Play((std::chrono::duration<number>(play_until.load()) - this->time) / 100);
+					PlanetsController::Play((duration(play_until.load()) - this->time) / 100);
 					progress = i;
 				}
 				mode = stopped;
@@ -130,7 +141,7 @@ private:
 			else if (mode == skip_for) {
 				std::lock_guard guard(main_mutex);
 				for (size_t i = 0; i < 100; i++) {
-					PlanetsController::Play(std::chrono::duration<number>(play_for.load()) / 100);
+					PlanetsController::Play(duration(play_for.load()) / 100);
 					progress = i;
 				}
 				mode = stopped;

@@ -2,5 +2,4 @@
 boost/1.79.0
 
 [generators]
-cmake_find_package
-cmake_paths
+cmake

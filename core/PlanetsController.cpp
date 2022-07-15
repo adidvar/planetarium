@@ -1,6 +1,6 @@
 #include "PlanetsController.h"{
 
-void PlanetsController::Play(duration elapsed) {
+EXPORT void PlanetsController::Play(duration elapsed) {
 		size_t takts = elapsed / time_peer_frame;
 		duration least = elapsed - time_peer_frame * takts;
 		for (size_t i = 0; i < takts; i++)
@@ -9,11 +9,10 @@ void PlanetsController::Play(duration elapsed) {
         time += elapsed;
 	}
 
-void PlanetsController::NextFrame(duration elapsed) {
+EXPORT void PlanetsController::NextFrame(duration elapsed) {
 	for (size_t i = 0; i < count; i++) {
 		accel_x[i] = 0; accel_y[i] = 0;
 	}
-
 	for (size_t i = 0; i < count; i++) {
 		for (size_t j = 0; j < count; j++) {
 			if (i == j) continue;
@@ -34,7 +33,7 @@ void PlanetsController::NextFrame(duration elapsed) {
 	}
 }
 
-std::string PlanetsController::GetTimeDump() const{
+EXPORT std::string PlanetsController::GetTimeDump() const{
 	size_t second = time.count();
 	size_t minutes = second / 60;
 	size_t hours = minutes / 60;
@@ -47,11 +46,11 @@ std::string PlanetsController::GetTimeDump() const{
 	days %= 365;
 
 	std::stringstream ss;
-	ss << "Years:  " << years << std::endl
-		<< "Days:   " << days << std::endl
-		<< "Hours:  " << hours << std::endl
-		<< "Minutes:" << minutes << std::endl
-		<< "Second: " << second << std::endl;
+	ss  << "Y:" << years << std::endl
+		<< "D:" << days << std::endl
+		<< "H:" << hours << std::endl
+		<< "M:" << minutes << std::endl
+		<< "S:" << second << std::endl;
 	return ss.str();
 }
 

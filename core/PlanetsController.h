@@ -7,6 +7,7 @@
 #include "Planet.h"
 #include "Options.h"
 #include "Number.h"
+#include "Settings.h"
 
 class PlanetsController {
 protected:
@@ -75,9 +76,9 @@ public:
 		time_peer_frame = dtime;
 	}
 
-    std::string GetTimeDump() const;
+     EXPORT std::string GetTimeDump() const;
 
-    void Play(duration delta);
+     EXPORT void Play(duration delta);
 private:
-    void NextFrame(duration elapsed);
+     EXPORT void NextFrame(duration elapsed);
 };

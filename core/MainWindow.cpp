@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 
-const std::unordered_map<sf::Keyboard::Key, char> MainWindow::key_map
+const std::unordered_map<sf::Keyboard::Key, char> key_map
     {
 		{sf::Keyboard::Q , 'q'},
 		{sf::Keyboard::W , 'w'},

@@ -5,14 +5,19 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+file(COPY conanfile.txt DESTINATION ${CMAKE_BINARY_DIR})
 
-file(GLOB files 
-     "*.h"
-     "*.cpp"
-)
-add_executable(Planetarium ${files})
-target_link_libraries(Planetarium sfml-system sfml-window sfml-graphics ${CONAN_LIBS})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+add_subdirectory(core)
+add_subdirectory(plugins)
+
+add_executable(Planetarium main.cpp)
+target_link_libraries(Planetarium Core)
+
+add_executable(Perf perf.cpp)
+target_link_libraries(Perf Core)

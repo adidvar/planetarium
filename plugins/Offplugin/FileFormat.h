@@ -1,29 +1,21 @@
-#pragma once
-
-#include <string>
-#include <vector>
-#include <stdexcept>
-
-#include "PlanetsController.h"
-
-class FileFormatError : public std::exception {
-};
-
-class FileFormat {
-public:
-	virtual std::vector<std::string> Formats() = 0;
-	virtual PlanetsController Load(const std::string & file_name) = 0;
-	virtual void Save(const PlanetsController & , const std::string & file_name) = 0;
-};
-
 #include <fstream>
+#include <iostream>
 
-#include "Options.h" 
+#include <boost/dll.hpp>
+
+#include <FileFormat.h>
 
 class OldFileFormat : public FileFormat {
+public:
+	OldFileFormat() {
+	};
+
+	virtual ~OldFileFormat() {
+	};
+
 	virtual std::vector<std::string> Formats()
 	{
-		return {"oldsystem"};
+		return { ".oldsystem" };
 	};
 
 	virtual PlanetsController Load(const std::string & file_name) override
@@ -64,3 +56,4 @@ class OldFileFormat : public FileFormat {
 	
 	};
 };
+
