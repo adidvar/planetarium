@@ -4,6 +4,9 @@
 
 #include "Number.h"
 
+/**
+ * \brief Vector 
+ */
 struct Vector
 {
     Vector(number x, number y):
@@ -22,7 +25,6 @@ struct Vector
     Vector operator *(number f){return Vector(this->x *f , this->y *f);}
     Vector operator /(number f){return Vector(this->x /f , this->y /f);}
 };
-
 
 inline Vector Vector::fromVector(number forge, number cos, number sin)
 {

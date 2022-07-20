@@ -1,15 +1,58 @@
 #include "PlanetsController.h"{
 
-EXPORT void PlanetsController::Play(duration elapsed) {
-		size_t takts = elapsed / time_peer_frame;
-		duration least = elapsed - time_peer_frame * takts;
-		for (size_t i = 0; i < takts; i++)
-			NextFrame(time_peer_frame);
-		NextFrame(least);
-        time += elapsed;
-	}
+PlanetsController::PlanetsController(size_t count, number* mass, number* x, number* y, number* speed_x, number* speed_y, number* density, Options* planets_opts, const Options& global_opts) noexcept :
+	count(count),
+	mass(mass),
+	x(x),
+	y(y),
+	speed_x(speed_x),
+	speed_y(speed_y),
+	density(density),
+	planets_options(planets_opts),
+	global_options(global_opts),
+	time{},
+	time_peer_frame(std::chrono::seconds(1)),
+	accel_x(new number[count]),
+	accel_y(new number[count])
+{
+}
 
-EXPORT void PlanetsController::NextFrame(duration elapsed) {
+PlanetsController::PlanetsController(PlanetsController&& from) noexcept :
+	count(from.count),
+	mass(std::move(from.mass)),
+	x(std::move(from.x)),
+	y(std::move(from.y)),
+	speed_x(std::move(from.speed_x)),
+	speed_y(std::move(from.speed_y)),
+	density(std::move(from.density)),
+	planets_options(std::move(from.planets_options)),
+	global_options(std::move(from.global_options)),
+	time(from.time),
+	time_peer_frame(from.time_peer_frame),
+	accel_x(std::move(from.accel_x)),
+	accel_y(std::move(from.accel_y))
+{
+};
+
+Planet PlanetsController::operator[](size_t index) const {
+	return Planet(GetOption<std::string>(planets_options[index], "name"), mass[index], density[index], x[index], y[index], speed_x[index], speed_y[index], 0, 0);
+}
+
+void PlanetsController::SetPrecision(duration dtime) noexcept
+{
+	time_peer_frame = dtime;
+}
+
+void PlanetsController::Play(duration elapsed) {
+	size_t takts = elapsed / time_peer_frame;
+	duration least = elapsed - time_peer_frame * takts;
+	for (size_t i = 0; i < takts; i++)
+		NextFrame(time_peer_frame);
+	NextFrame(least);
+	time += elapsed;
+}
+
+void PlanetsController::NextFrame(duration elapsed) {
 	for (size_t i = 0; i < count; i++) {
 		accel_x[i] = 0; accel_y[i] = 0;
 	}
@@ -33,25 +76,8 @@ EXPORT void PlanetsController::NextFrame(duration elapsed) {
 	}
 }
 
-EXPORT std::string PlanetsController::GetTimeDump() const{
-	size_t second = time.count();
-	size_t minutes = second / 60;
-	size_t hours = minutes / 60;
-	size_t days = hours / 24;
-	size_t years = days / 365;
-
-	second %= 60;
-	minutes %= 60;
-	hours %= 24;
-	days %= 365;
-
-	std::stringstream ss;
-	ss  << "Y:" << years << std::endl
-		<< "D:" << days << std::endl
-		<< "H:" << hours << std::endl
-		<< "M:" << minutes << std::endl
-		<< "S:" << second << std::endl;
-	return ss.str();
+PlanetsController::duration PlanetsController::GetTime() const {
+	return time;
 }
 
 //#include <boost/filesystem.hpp>

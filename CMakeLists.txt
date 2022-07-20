@@ -18,6 +18,4 @@ add_subdirectory(plugins)
 
 add_executable(Planetarium main.cpp)
 target_link_libraries(Planetarium Core)
-
-add_executable(Perf perf.cpp)
-target_link_libraries(Perf Core)
+add_dependencies(Planetarium OldFFormat)

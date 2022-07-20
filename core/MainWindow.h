@@ -16,7 +16,6 @@
 #include "Settings.h"
 	
 const extern std::unordered_map<sf::Keyboard::Key, char> key_map;
-
 class MainWindow {
 	std::unique_ptr<PlanetsThread> core;
 	PTransformer transformer;
@@ -34,26 +33,28 @@ class MainWindow {
 	std::vector<Planet> planets;
 	std::vector<std::filesystem::path> filenames;
 
-
-	EXPORT void EventHandle(sf::Event& e);
+	void EventHandle(sf::Event& e);
 	void OnCommand(const std::vector<std::string>& argc) {
-		
-		if (argc.front() == "stop") {
-				core->Stop();
-			}
-			if (argc.front() == "start") {
-				core->Play(std::stof(argc[1]));
-			}
-			if (argc.front() == "skip") {
-				core->PlayFor(std::stof(argc[1]));
-			}
-			if (argc.front() == "precision") {
-				core->SetFrameTime(PlanetsThread::duration(std::stof(argc[1])));
-			}
+
+		if (argc.front() == "stop" || argc.front() == "pause") {
+			core->Stop();
+		}
+		if (argc.front() == "start" || argc.front() == "play") {
+			core->Play(std::stof(argc[1]));
+		}
+		if (argc.front() == "skip" || argc.front() == "playto") {
+			core->PlayFor(std::stof(argc[1]));
+		}
+		if (argc.front() == "skipuntil" || argc.front() == "playuntil") {
+			core->PlayUntil(std::stof(argc[1]));
+		}
+		if (argc.front() == "precision" || argc.front() == "p") {
+			core->SetPrecision(PlanetsThread::duration(std::stof(argc[1])));
+		}
 	};
 
 public:
-	MainWindow(const std::vector<FileFormat*> &file_formats , size_t width, size_t height) :
+	MainWindow(const std::vector<FileFormat*>& file_formats, size_t width, size_t height) :
 		file_formats(file_formats),
 		transformer(width, height),
 		window(sf::VideoMode(width, height), "Main"),
@@ -90,14 +91,13 @@ public:
 						core.reset(new PlanetsThread(addon->Load(name.string())));
 
 						auto state = core->LoadState();
-						auto x = std::minmax_element(state.begin(), state.end(), [](const Planet &t1, const Planet &t2) {return t1.x < t2.x; });
-						auto y = std::minmax_element(state.begin(), state.end(), [](const Planet &t1, const Planet &t2) {return t1.y < t2.y; });
+						auto x = std::minmax_element(state.begin(), state.end(), [](const Planet& t1, const Planet& t2) {return t1.x < t2.x; });
+						auto y = std::minmax_element(state.begin(), state.end(), [](const Planet& t1, const Planet& t2) {return t1.y < t2.y; });
 						auto dx = x.second->x - x.first->x;
 						auto dy = y.second->y - y.first->y;
 
 						transformer.SetScale(dx, dy);
-						
-						core->SetFrameTime(PlanetsThread::duration{ 1 });
+
 						return;
 					}
 				}
@@ -111,7 +111,7 @@ public:
 		for (auto&& file : std::filesystem::directory_iterator(std::filesystem::current_path()))
 			if (file.is_regular_file())
 				for (auto&& addon : file_formats) {
-					auto&&formats = addon->Formats();
+					auto&& formats = addon->Formats();
 					if (std::count(formats.begin(), formats.end(), file.path().extension()) == 1)
 						filenames.push_back(file.path().string());
 				}
@@ -160,19 +160,22 @@ public:
 
 		window.clear();
 
+		if (core->IsLoading()) {
+			DrawText(std::to_string(core->GetProgress()), sf::Color::Red, 40, { width / 2.0f , height / 2.0f }, { 0.5 , 0.5 });
+			window.display();
+			return;
+		}
+
 		DrawText(core->GetTimeDump(), sf::Color::White, 20);
 
 		if (console_e)
 			DrawText(console.Text(), sf::Color::White, 20, { 0, 400 });
 
-		if (core->IsLoading()) {
-			DrawText(std::to_string(core->GetProgress()), sf::Color::Red, 40, { width / 2.0f , height / 2.0f }, { 0.5 , 0.5 });
-		}
 
 		if (core->SlowDownWarning())
 			DrawText("Slow down error", sf::Color::Red, 40, { width / 2.0f, height / 2.0f }, { 0.5 , 1.35 });
 
-		DrawText(std::to_string(core->GetSimulationFrequency()), sf::Color::Red, 20, { static_cast<float>(width)  , 0 }, { 1 , 0 });
+		DrawText(std::to_string(core->GetSpeed()), sf::Color::Red, 20, { static_cast<float>(width)  , 0 }, { 1 , 0 });
 
 		RenderPlanets();
 
