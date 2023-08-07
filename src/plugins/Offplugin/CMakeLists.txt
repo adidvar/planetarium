@@ -11,4 +11,4 @@ file(GLOB files
 )
 
 add_library(OldFFormat MODULE ${files})
-target_link_libraries(OldFFormat Core)
+target_link_libraries(OldFFormat Boost::headers)

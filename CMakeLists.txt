@@ -1,21 +1,15 @@
-cmake_minimum_required(VERSION 3.10)
-project(Planets)
+cmake_minimum_required(VERSION 3.24.2)
+project(Planetarium LANGUAGES C CXX VERSION 1.0.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+file(COPY_FILE conanfile.txt ${CMAKE_BINARY_DIR}/conanfile.txt)
+set(CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR};${CMAKE_PREFIX_PATH}")
+set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR};${CMAKE_MODULE_PATH}")
 
-file(COPY conanfile.txt DESTINATION ${CMAKE_BINARY_DIR})
+find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
+find_package(Boost 1.82.0 REQUIRED)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-add_subdirectory(core)
-add_subdirectory(plugins)
-
-add_executable(Planetarium main.cpp)
-target_link_libraries(Planetarium Core)
-add_dependencies(Planetarium OldFFormat)
+add_subdirectory(src)

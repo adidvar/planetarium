@@ -66,3 +66,21 @@ public:
 private:
      void NextFrame(duration elapsed);
 };
+
+
+inline PlanetsController::PlanetsController(size_t count, number* mass, number* x, number* y, number* speed_x, number* speed_y, number* density, Options* planets_opts, const Options& global_opts) noexcept :
+	count(count),
+	mass(mass),
+	x(x),
+	y(y),
+	speed_x(speed_x),
+	speed_y(speed_y),
+	density(density),
+	planets_options(planets_opts),
+	global_options(global_opts),
+	time{},
+	time_peer_frame(std::chrono::seconds(1)),
+	accel_x(new number[count]),
+	accel_y(new number[count])
+{
+}
