@@ -14,12 +14,13 @@ A 2D gravity simulation program that utilizes the Boost and SFML libraries to mo
 ## Installation
 To install the Gravity Simulation Program, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/yourusername/gravity-simulation.git`
-2. Navigate to the project directory: `cd gravity-simulation`
+1. Clone the repository: `git clone https://github.com/adidvar/Planetarium.git`
+2. Navigate to the project directory: `cd Planetarium`
 3. Create a build directory: `mkdir build && cd build`
-4. Install dependencies using Conan: `conan install ..`
-5. Generate build files using CMake: `cmake ..`
-6. Build the program: `cmake --build .`
+4. 5. Generate build files using CMake: `cmake . -S ..`
+5. Install dependencies using Conan: `conan install .`
+6. Generate build files using CMake: `cmake .`
+7. Build the program: `cmake --build .`
 
 ## Usage
 After building the program, you can run it from the command line:
