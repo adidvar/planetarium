@@ -36,7 +36,8 @@ Utilizes the Boost and SFML libraries for rendering and calculations.
 Capable of modeling long-term body motion and behavior.
 Provides a platform for experimentation and observation of gravitational effects.
 
-## Screenshots
+
+
 ![Screenshot 1](assets/screenshot1.png)
 ![Screenshot 2](assets/screenshot2.png)
 ![Screenshot 3](assets/screenshot3.png)
