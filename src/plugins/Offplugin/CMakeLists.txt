@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.30)
 project(OldFileFormat)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -12,3 +12,10 @@ file(GLOB files
 
 add_library(OldFFormat MODULE ${files})
 target_link_libraries(OldFFormat Boost::headers)
+
+install(TARGETS OldFFormat 
+    RUNTIME DESTINATION .          
+    LIBRARY DESTINATION .           
+    ARCHIVE DESTINATION .  
+)
+

@@ -5,12 +5,8 @@ A 2D gravity simulation program that utilizes the Boost and SFML libraries to mo
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
-- [Features](#features)
 - [Screenshots](#screenshots)
-- [Contributing](#contributing)
 - [License](#license)
-- [Contact](#contact)
-
 ## Installation
 To install the Gravity Simulation Program, follow these steps:
 
@@ -31,22 +27,10 @@ Load simulation from *.oldsystem files and start it using ENTER + "start {speed}
 
 ```
 
-## Features
-Simulates gravitational interactions in a 2D space.
-Utilizes the Boost and SFML libraries for rendering and calculations.
-Capable of modeling long-term body motion and behavior.
-Provides a platform for experimentation and observation of gravitational effects.
-
 ## Screenshots
 ![Screenshot 1](assets/screenshot1.png)
 ![Screenshot 2](assets/screenshot2.png)
 ![Screenshot 3](assets/screenshot3.png)
 
-## Contributing
-Contributions are welcome! If you would like to contribute to the project, please follow these steps:
-
 ## License
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See the LICENSE file for more details.
-
-## Contact
-If you have any questions, feedback, or suggestions, you can reach out to the project maintainer at adidvar@gmail.com.
